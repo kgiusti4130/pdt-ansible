@@ -10,24 +10,24 @@ remote as: 13501
 my ip: 192.168.0.0/31
 peer ip: 192.168.0.1/31
 bgp secret: my_hash
-route map in: 13501_IN
-route map out: 13501_OUT
+route map in: OARNET_AS13501_IN
+route map out: OARNET_AS13501_OUT
 !
 peer name: ATT
 remote as: 7018
 my ip: 192.168.10.1/30
 peer ip: 192.168.10.2/30
 bgp secret: good_pass
-route map in: 7018_IN
-route map out: 7018_OUT
+route map in: ATT_AS7018_IN
+route map out: ATT_AS7018_OUT
 !
 peer name: LEVEL3
 remote as: 3356
 my ip: 192.168.11.1/30
 peer ip: 192.168.11.2/30
 bgp secret: False
-route map in: 3356_IN
-route map out: 3356_OUT
+route map in: LEVEL3_AS3356_IN
+route map out: LEVEL3_AS3356_OUT
 !
 ############################################
 #            Arista BGP snippet            #
