@@ -50,7 +50,7 @@ route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
 route-map {{ item.name }}_AS{{ item.as_number }}_IN permit 10
   match ip prefix-list PL_DEFAULT_IN
 {%  if item.local_pref !=100 %}
-        set local-preference {{ item.local_pref }}
+  set local-preference {{ item.local_pref }}
 {%  endif %}
 {% endfor %}
 
@@ -123,6 +123,28 @@ config router bgp
 ip prefix-list {{ pl_name }} seq {{ loop.index * 10 }} permit {{ line }}
 {%  endfor %}
 
+{% endfor %}
+{% for item in bgp_peers if item.prepend != false %}
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend {% for i in range(item.prepend) %}
+{{ item.as_number }}{% if not loop.last %} {% endif %}
+{% endfor %}
+!
+{% for item in bgp_peers if item.prepend == false %}
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+{% endfor %}
+{% endfor %}
+{% for item in bgp_peers %}
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
+{%  if item.local_pref !=100 %}
+  set local-preference {{ item.local_pref }}
+{%  endif %}
 {% endfor %}
 
 router bgp {{ local_as }}

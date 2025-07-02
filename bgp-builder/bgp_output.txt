@@ -64,11 +64,11 @@ route-map OARNET_AS13501_OUT permit 10
 !
 route-map OARNET_AS13501_IN permit 10
   match ip prefix-list PL_DEFAULT_IN
-        set local-preference 150
+  set local-preference 150
 !
 route-map ATT_AS7018_IN permit 10
   match ip prefix-list PL_DEFAULT_IN
-        set local-preference 150
+  set local-preference 150
 !
 route-map LEVEL3_AS3356_IN permit 10
   match ip prefix-list PL_DEFAULT_IN
@@ -146,6 +146,31 @@ ip prefix-list PL_DEFAULT_OUT seq 30 permit 10.97.12.0/24
 ip prefix-list PL_DEFAULT_OUT seq 40 permit 10.97.13.0/24
 ip prefix-list PL_DEFAULT_OUT seq 50 permit 10.97.14.0/24
 
+!
+route-map ATT_AS7018_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend 7018 7018 7018!
+!
+route-map OARNET_AS13501_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+!
+route-map LEVEL3_AS3356_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend 3356 3356 3356 3356!
+!
+route-map OARNET_AS13501_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+!
+route-map OARNET_AS13501_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
+  set local-preference 150
+!
+route-map ATT_AS7018_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
+  set local-preference 150
+!
+route-map LEVEL3_AS3356_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
 
 router bgp 65001
    router_id 192.168.199.1
