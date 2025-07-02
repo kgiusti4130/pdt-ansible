@@ -25,30 +25,30 @@ route map out: {{ item.as_number }}_OUT
 ############################################
 
 {% for pl_name, pl_lines in prefix_lists.items() %}
-    ip prefix-list {{ pl_name }}
-    {% for line in pl_lines %}
-       permit {{ line }}
+ip prefix-list {{ pl_name }}
+{% for line in pl_lines %}
+   permit {{ line }}
 {%  endfor %}
 
 {% endfor %}
 {% for item in bgp_peers if item.prepend != false %}
-      !
-      route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
-        set as-path prepend {% for i in range(item.prepend) %}
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend {% for i in range(item.prepend) %}
 {{ item.as_number }}{% if not loop.last %} {% endif %}
 {% endfor %}
 
 {% for item in bgp_peers if item.prepend == false %}
-      !
-      route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
 {% endfor %}
 {% endfor %}
 {% for item in bgp_peers %}
-      !
-      route-map {{ item.name }}_AS{{ item.as_number }}_IN permit 10
-        match ip prefix-list PL_DEFAULT_IN
+!
+route-map {{ item.name }}_AS{{ item.as_number }}_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
 {%  if item.local_pref !=100 %}
         set local-preference {{ item.local_pref }}
 {%  endif %}
@@ -118,33 +118,33 @@ config router bgp
 ############################################
 #           Cisco BGP snippet              #
 ############################################
-  {% for pl_name, pl_lines in prefix_lists.items() %}
-  {% for line in pl_lines %}
-  ip prefix-list {{ pl_name }} seq {{ loop.index * 10 }} permit {{ line }}
-  {%  endfor %}
+{% for pl_name, pl_lines in prefix_lists.items() %}
+{% for line in pl_lines %}
+ip prefix-list {{ pl_name }} seq {{ loop.index * 10 }} permit {{ line }}
+{%  endfor %}
 
-  {% endfor %}
+{% endfor %}
 
 router bgp {{ local_as }}
-     router_id {{ router_id }}
+   router_id {{ router_id }}
 {% for item in bgp_peers %}
 {%  if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} remote-as {{ item.as_number }}
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} description {{ item.name }} BGP peer
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
-      !
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} remote-as {{ item.as_number }}
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} description {{ item.name }} BGP peer
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+   !
 {% else %}
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} remote-as {{ item.as_number }}
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} description {{ item.name }} BGP peer
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
-      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
-      !
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} remote-as {{ item.as_number }}
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} description {{ item.name }} BGP peer
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+   neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+   !
 {% endif %}
 {% endfor %}
 {% for pl_name, pl_lines in prefix_lists.items() if 'OUT' in pl_name %}
 {% for line in pl_lines %}
-      network {{ line | ansible.utils.ipaddr('network')  }} mask {{ line | ansible.utils.ipaddr('netmask')  }}
+   network {{ line | ansible.utils.ipaddr('network')  }} mask {{ line | ansible.utils.ipaddr('netmask')  }}
 {%  endfor %}
 {% endfor %}
 

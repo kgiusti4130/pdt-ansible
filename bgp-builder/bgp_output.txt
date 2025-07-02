@@ -33,45 +33,45 @@ route map out: 3356_OUT
 #            Arista BGP snippet            #
 ############################################
 
-    ip prefix-list PL_DEFAULT_IN
-           permit 10.96.10.0/24
-       permit 10.96.11.0/24
-       permit 10.96.12.0/24
-       permit 10.96.13.0/24
-       permit 10.96.14.0/24
+ip prefix-list PL_DEFAULT_IN
+   permit 10.96.10.0/24
+   permit 10.96.11.0/24
+   permit 10.96.12.0/24
+   permit 10.96.13.0/24
+   permit 10.96.14.0/24
 
-    ip prefix-list PL_DEFAULT_OUT
-           permit 10.97.10.0/24
-       permit 10.97.11.0/24
-       permit 10.97.12.0/24
-       permit 10.97.13.0/24
-       permit 10.97.14.0/24
+ip prefix-list PL_DEFAULT_OUT
+   permit 10.97.10.0/24
+   permit 10.97.11.0/24
+   permit 10.97.12.0/24
+   permit 10.97.13.0/24
+   permit 10.97.14.0/24
 
-      !
-      route-map ATT_AS7018_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
-        set as-path prepend 7018 7018 7018
-      !
-      route-map OARNET_AS13501_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
-      !
-      route-map LEVEL3_AS3356_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
-        set as-path prepend 3356 3356 3356 3356
-      !
-      route-map OARNET_AS13501_OUT permit 10
-        match ip prefix-list PL_DEFAULT_OUT
-      !
-      route-map OARNET_AS13501_IN permit 10
-        match ip prefix-list PL_DEFAULT_IN
+!
+route-map ATT_AS7018_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend 7018 7018 7018
+!
+route-map OARNET_AS13501_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+!
+route-map LEVEL3_AS3356_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+  set as-path prepend 3356 3356 3356 3356
+!
+route-map OARNET_AS13501_OUT permit 10
+  match ip prefix-list PL_DEFAULT_OUT
+!
+route-map OARNET_AS13501_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
         set local-preference 150
-      !
-      route-map ATT_AS7018_IN permit 10
-        match ip prefix-list PL_DEFAULT_IN
+!
+route-map ATT_AS7018_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
         set local-preference 150
-      !
-      route-map LEVEL3_AS3356_IN permit 10
-        match ip prefix-list PL_DEFAULT_IN
+!
+route-map LEVEL3_AS3356_IN permit 10
+  match ip prefix-list PL_DEFAULT_IN
 
 router bgp 65001
    maximum-paths 4 ecmp 4
@@ -134,41 +134,41 @@ config router bgp
 ############################################
 #           Cisco BGP snippet              #
 ############################################
-      ip prefix-list PL_DEFAULT_IN seq 10 permit 10.96.10.0/24
-    ip prefix-list PL_DEFAULT_IN seq 20 permit 10.96.11.0/24
-    ip prefix-list PL_DEFAULT_IN seq 30 permit 10.96.12.0/24
-    ip prefix-list PL_DEFAULT_IN seq 40 permit 10.96.13.0/24
-    ip prefix-list PL_DEFAULT_IN seq 50 permit 10.96.14.0/24
+ip prefix-list PL_DEFAULT_IN seq 10 permit 10.96.10.0/24
+ip prefix-list PL_DEFAULT_IN seq 20 permit 10.96.11.0/24
+ip prefix-list PL_DEFAULT_IN seq 30 permit 10.96.12.0/24
+ip prefix-list PL_DEFAULT_IN seq 40 permit 10.96.13.0/24
+ip prefix-list PL_DEFAULT_IN seq 50 permit 10.96.14.0/24
 
-      ip prefix-list PL_DEFAULT_OUT seq 10 permit 10.97.10.0/24
-    ip prefix-list PL_DEFAULT_OUT seq 20 permit 10.97.11.0/24
-    ip prefix-list PL_DEFAULT_OUT seq 30 permit 10.97.12.0/24
-    ip prefix-list PL_DEFAULT_OUT seq 40 permit 10.97.13.0/24
-    ip prefix-list PL_DEFAULT_OUT seq 50 permit 10.97.14.0/24
+ip prefix-list PL_DEFAULT_OUT seq 10 permit 10.97.10.0/24
+ip prefix-list PL_DEFAULT_OUT seq 20 permit 10.97.11.0/24
+ip prefix-list PL_DEFAULT_OUT seq 30 permit 10.97.12.0/24
+ip prefix-list PL_DEFAULT_OUT seq 40 permit 10.97.13.0/24
+ip prefix-list PL_DEFAULT_OUT seq 50 permit 10.97.14.0/24
 
 
 router bgp 65001
-     router_id 192.168.199.1
-      neighbor 192.168.0.1 remote-as 13501
-      neighbor 192.168.0.1 description OARNET BGP peer
-      neighbor 192.168.0.1 route-map OARNET_AS13501_OUT out
-      neighbor 192.168.0.1 route-map OARNET_AS13501_IN in
-      !
-      neighbor 192.168.10.2 remote-as 7018
-      neighbor 192.168.10.2 description ATT BGP peer
-      neighbor 192.168.10.2 route-map ATT_AS7018_OUT out
-      neighbor 192.168.10.2 route-map ATT_AS7018_IN in
-      !
-      neighbor 192.168.11.2 remote-as 3356
-      neighbor 192.168.11.2 description LEVEL3 BGP peer
-      neighbor 192.168.11.2 route-map LEVEL3_AS3356_OUT out
-      neighbor 192.168.11.2 route-map LEVEL3_AS3356_IN in
-      !
-      network 10.97.10.0 mask 255.255.255.0
-      network 10.97.11.0 mask 255.255.255.0
-      network 10.97.12.0 mask 255.255.255.0
-      network 10.97.13.0 mask 255.255.255.0
-      network 10.97.14.0 mask 255.255.255.0
+   router_id 192.168.199.1
+   neighbor 192.168.0.1 remote-as 13501
+   neighbor 192.168.0.1 description OARNET BGP peer
+   neighbor 192.168.0.1 route-map OARNET_AS13501_OUT out
+   neighbor 192.168.0.1 route-map OARNET_AS13501_IN in
+   !
+   neighbor 192.168.10.2 remote-as 7018
+   neighbor 192.168.10.2 description ATT BGP peer
+   neighbor 192.168.10.2 route-map ATT_AS7018_OUT out
+   neighbor 192.168.10.2 route-map ATT_AS7018_IN in
+   !
+   neighbor 192.168.11.2 remote-as 3356
+   neighbor 192.168.11.2 description LEVEL3 BGP peer
+   neighbor 192.168.11.2 route-map LEVEL3_AS3356_OUT out
+   neighbor 192.168.11.2 route-map LEVEL3_AS3356_IN in
+   !
+   network 10.97.10.0 mask 255.255.255.0
+   network 10.97.11.0 mask 255.255.255.0
+   network 10.97.12.0 mask 255.255.255.0
+   network 10.97.13.0 mask 255.255.255.0
+   network 10.97.14.0 mask 255.255.255.0
 
 ############################################
 #             Palo BGP snippet             #
