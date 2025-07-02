@@ -1,0 +1,49 @@
+- name: BGP Builder Playbook
+  connection: local
+  hosts: localhost
+  gather_facts: false
+  vars:
+    local_as: "65001"
+    router_id: 192.168.199.1
+    peer_group: "bgp_peer_group"
+    palo_intf: "ethernet1/4.898"
+    bgp_peers:
+      - name: OARNET
+        as_number: 3359
+        subnet: 192.168.0.0/31
+        bgp_hash: my_hash
+        local_pref: 150
+        prepend: false
+      - name: ATT
+        as_number: 1017
+        subnet: 192.168.10.0/30
+        bgp_hash: good_pass
+        local_pref: 150
+        prepend: 3
+      - name: COX
+        as_number: 9898
+        subnet: 192.168.11.0/30
+        bgp_hash: false
+        local_pref: 100
+        prepend: 4
+
+    prefix_lists:
+      PL_DEFAULT_IN:
+        - 10.96.0.0/24
+        - 10.97.11.0/24
+        - 10.99.15.0/24
+        - 10.100.5.0/25
+        - 10.100.6.128/25
+      PL_DEFAULT_OUT:
+        - 10.96.0.0/24
+        - 10.97.11.0/24
+        - 10.99.15.0/24
+        - 10.100.5.0/25
+        - 10.100.6.128/25
+
+  tasks:
+    - name: Generate BGP output
+      ansible.builtin.template:
+        src: ../templates/bgp_builder.j2
+        dest: ../bgp_output.txt
+        mode: '0755'

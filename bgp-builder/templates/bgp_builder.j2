@@ -1,0 +1,210 @@
+---
+# This file is generated via bgp_builder.yml playbook
+
+############################################
+#           Arista Prefix Lists            #
+############################################
+
+{% for pl_name, pl_lines in prefix_lists.items() %}
+ip prefix-list {{ pl_name }}
+{% for line in pl_lines %}
+   permit {{ line }}
+{%  endfor %}
+
+{% endfor %}
+############################################
+#            Cisco Prefix Lists            #
+############################################
+
+{% for pl_name, pl_lines in prefix_lists.items() %}
+{% for line in pl_lines %}
+ip prefix-list {{ pl_name }} seq {{ loop.index * 10 }} permit {{ line }}
+{%  endfor %}
+
+{% endfor %}
+############################################
+#              BGP Information             #
+############################################
+
+{% for item in bgp_peers %}
+peer name: {{ item.name }}
+remote as: {{ item.as_number }}
+{%  if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+my ip: {{ item.subnet | ansible.utils.next_nth_usable(0) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+peer ip: {{ item.subnet | ansible.utils.next_nth_usable(1) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+{% else %}
+my ip: {{ item.subnet | ansible.utils.next_nth_usable(1) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+peer ip: {{ item.subnet | ansible.utils.next_nth_usable(2) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+{%  endif %}
+bgp secret: {{ item.bgp_hash }}
+route map in: {{ item.as_number }}_IN
+route map out: {{ item.as_number }}_OUT
+!
+{% endfor %}
+############################################
+#            Arista BGP snippet            #
+############################################
+{% for item in bgp_peers if item.prepend != false %}
+      !
+      route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+        match ip prefix-list PL_DEFAULT_OUT
+        set as-path prepend {% for i in range(item.prepend) %}
+{{ item.as_number }}{% if not loop.last %} {% endif %}
+{% endfor %}
+
+{% for item in bgp_peers if item.prepend == false %}
+      !
+      route-map {{ item.name }}_AS{{ item.as_number }}_OUT permit 10
+        match ip prefix-list PL_DEFAULT_OUT
+{% endfor %}
+{% endfor %}
+{% for item in bgp_peers %}
+      !
+      route-map {{ item.name }}_AS{{ item.as_number }}_IN permit 10
+        match ip prefix-list PL_DEFAULT_IN
+{%  if item.local_pref !=100 %}
+        set local-preference {{ item.local_pref }}
+{%  endif %}
+{% endfor %}
+
+router bgp {{ local_as }}
+   maximum-paths 4 ecmp 4
+   !
+   vrf default
+{% for item in bgp_peers %}
+{%  if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} remote-as {{ item.as_number }}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} description {{ item.name }} BGP peer
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} maximum-routes 12000
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+{% else %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} remote-as {{ item.as_number }}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} description {{ item.name }} BGP peer
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} maximum-routes 12000
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+{%  endif %}
+{%  if item.bgp_hash !=false and item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} password {{ item.bgp_hash }}
+{%  endif %}
+{%  if item.bgp_hash !=false and item.subnet | ansible.utils.ipaddr('prefix') != 31 %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} password {{ item.bgp_hash }}
+{%  endif %}
+      !
+{% endfor %}
+{% for pl_name, pl_lines in prefix_lists.items() if 'OUT' in pl_name %}
+{% for line in pl_lines %}
+      network {{ line }}
+{%  endfor %}
+{% endfor %}
+!
+router general
+   router-id ipv4 {{ router_id }}
+!
+
+############################################
+#           Fortigate BGP snippet          #
+############################################
+
+config router bgp
+    set as {{ local_as }}
+    set router-id {{ router_id }}
+    config neighbor
+{% for item in bgp_peers %}
+{% if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+        edit "{{ item.subnet | ansible.utils.next_nth_usable(1) }}"
+            set remote-as {{ item.as_number }}
+        next
+    end
+{% else %}
+        edit "{{ item.subnet | ansible.utils.next_nth_usable(2) }}"
+            set remote-as {{ item.as_number }}
+        next
+    end
+{% endif %}
+{% endfor %}
+
+    config redistribute "connected"
+        set status enable
+
+############################################
+#           Cisco BGP snippet              #
+############################################
+
+router bgp {{ local_as }}
+     router_id {{ router_id }}
+{% for item in bgp_peers %}
+{%  if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} remote-as {{ item.as_number }}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} description {{ item.name }} BGP peer
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(1) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+      !
+{% else %}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} remote-as {{ item.as_number }}
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} description {{ item.name }} BGP peer
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_OUT out
+      neighbor {{ item.subnet | ansible.utils.next_nth_usable(2) }} route-map {{ item.name }}_AS{{ item.as_number }}_IN in
+      !
+{% endif %}
+{% endfor %}
+{% for pl_name, pl_lines in prefix_lists.items() if 'OUT' in pl_name %}
+{% for line in pl_lines %}
+      network {{ line | ansible.utils.ipaddr('network')  }} mask {{ line | ansible.utils.ipaddr('netmask')  }}
+{%  endfor %}
+{% endfor %}
+
+############################################
+#             Palo BGP snippet             #
+############################################
+
+set network virtual-router default protocol bgp enable yes
+set network virtual-router default protocol bgp router-id {{ router_id }}
+set network virtual-router default protocol bgp local-as {{ local_as }}
+set network virtual-router default protocol bgp install-route yes
+{% for item in bgp_peers %}
+{%  if item.subnet | ansible.utils.ipaddr('prefix') == 31 %}
+!
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} peer-address ip {{ item.subnet | ansible.utils.next_nth_usable(1) }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} local-address {{ item.subnet | ansible.utils.next_nth_usable(0) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} local-address interface {{ palo_intf }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} max-prefixes 5000
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} enable yes
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} peer-as {{ item.as_number }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} enable yes
+{% else %}
+!
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} peer-address ip {{ item.subnet | ansible.utils.next_nth_usable(2) }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} local-address {{ item.subnet | ansible.utils.next_nth_usable(1) }}/{{ item.subnet | ansible.utils.ipaddr('prefix') }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} local-address interface {{ palo_intf }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} max-prefixes 5000
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} enable yes
+set network virtual-router default protocol bgp peer-group {{ peer_group }} peer {{ item.name }} peer-as {{ item.as_number }}
+set network virtual-router default protocol bgp peer-group {{ peer_group }} enable yes
+{% endif %}
+!
+{% if item.prepend != false %}
+set network virtual-router default protocol bgp policy export rules prepend action allow update as-path prepend {{ item.prepend }}
+{% endif %}
+{% for pl_name, pl_lines in prefix_lists.items() if 'OUT' in pl_name %}
+{% for line in pl_lines %}
+set network virtual-router default protocol bgp policy export rules {{ item.name }} match address-prefix {{ line }} exact yes
+{%  endfor %}
+{% endfor %}
+set network virtual-router default protocol bgp policy export rules {{ item.name }} match route-table unicast
+set network virtual-router default protocol bgp policy export rules {{ item.name }} used-by {{ peer_group }}
+set network virtual-router default protocol bgp policy export rules {{ item.name }} enable no
+!
+{%  if item.local_pref !=100 %}
+set network virtual-router default protocol bgp policy import rules {{ item.name }} action allow update local-preference {{ item.local_pref }}
+{%  endif %}
+{% for pl_name, pl_lines in prefix_lists.items() if 'OUT' in pl_name %}
+{% for line in pl_lines %}
+set network virtual-router default protocol bgp policy import rules {{ item.name }} match address-prefix {{ line }} exact yes
+{%  endfor %}
+{% endfor %}
+set network virtual-router default protocol bgp policy import rules {{ item.name }} match route-table unicast
+set network virtual-router default protocol bgp policy import rules {{ item.name }} used-by {{ peer_group }}
+set network virtual-router default protocol bgp policy import rules {{ item.name }} enable yes
+{% endfor %}
