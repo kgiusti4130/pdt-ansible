@@ -2,125 +2,106 @@
 # This file is generated via bgp_builder.yml playbook
 
 ############################################
-#           Arista Prefix Lists            #
-############################################
-
-ip prefix-list PL_DEFAULT_IN
-   permit 10.96.0.0/24
-   permit 10.97.11.0/24
-   permit 10.99.15.0/24
-   permit 10.100.5.0/25
-   permit 10.100.6.128/25
-
-ip prefix-list PL_DEFAULT_OUT
-   permit 10.96.0.0/24
-   permit 10.97.11.0/24
-   permit 10.99.15.0/24
-   permit 10.100.5.0/25
-   permit 10.100.6.128/25
-
-############################################
-#            Cisco Prefix Lists            #
-############################################
-
-ip prefix-list PL_DEFAULT_IN seq 10 permit 10.96.0.0/24
-ip prefix-list PL_DEFAULT_IN seq 20 permit 10.97.11.0/24
-ip prefix-list PL_DEFAULT_IN seq 30 permit 10.99.15.0/24
-ip prefix-list PL_DEFAULT_IN seq 40 permit 10.100.5.0/25
-ip prefix-list PL_DEFAULT_IN seq 50 permit 10.100.6.128/25
-
-ip prefix-list PL_DEFAULT_OUT seq 10 permit 10.96.0.0/24
-ip prefix-list PL_DEFAULT_OUT seq 20 permit 10.97.11.0/24
-ip prefix-list PL_DEFAULT_OUT seq 30 permit 10.99.15.0/24
-ip prefix-list PL_DEFAULT_OUT seq 40 permit 10.100.5.0/25
-ip prefix-list PL_DEFAULT_OUT seq 50 permit 10.100.6.128/25
-
-############################################
 #              BGP Information             #
 ############################################
 
 peer name: OARNET
-remote as: 3359
+remote as: 13501
 my ip: 192.168.0.0/31
 peer ip: 192.168.0.1/31
 bgp secret: my_hash
-route map in: 3359_IN
-route map out: 3359_OUT
+route map in: 13501_IN
+route map out: 13501_OUT
 !
 peer name: ATT
-remote as: 1017
+remote as: 7018
 my ip: 192.168.10.1/30
 peer ip: 192.168.10.2/30
 bgp secret: good_pass
-route map in: 1017_IN
-route map out: 1017_OUT
+route map in: 7018_IN
+route map out: 7018_OUT
 !
-peer name: COX
-remote as: 9898
+peer name: LEVEL3
+remote as: 3356
 my ip: 192.168.11.1/30
 peer ip: 192.168.11.2/30
 bgp secret: False
-route map in: 9898_IN
-route map out: 9898_OUT
+route map in: 3356_IN
+route map out: 3356_OUT
 !
 ############################################
 #            Arista BGP snippet            #
 ############################################
+
+    ip prefix-list PL_DEFAULT_IN
+           permit 10.96.10.0/24
+       permit 10.96.11.0/24
+       permit 10.96.12.0/24
+       permit 10.96.13.0/24
+       permit 10.96.14.0/24
+
+    ip prefix-list PL_DEFAULT_OUT
+           permit 10.97.10.0/24
+       permit 10.97.11.0/24
+       permit 10.97.12.0/24
+       permit 10.97.13.0/24
+       permit 10.97.14.0/24
+
       !
-      route-map ATT_AS1017_OUT permit 10
+      route-map ATT_AS7018_OUT permit 10
         match ip prefix-list PL_DEFAULT_OUT
-        set as-path prepend 1017 1017 1017
+        set as-path prepend 7018 7018 7018
       !
-      route-map OARNET_AS3359_OUT permit 10
+      route-map OARNET_AS13501_OUT permit 10
         match ip prefix-list PL_DEFAULT_OUT
       !
-      route-map COX_AS9898_OUT permit 10
+      route-map LEVEL3_AS3356_OUT permit 10
         match ip prefix-list PL_DEFAULT_OUT
-        set as-path prepend 9898 9898 9898 9898
+        set as-path prepend 3356 3356 3356 3356
       !
-      route-map OARNET_AS3359_OUT permit 10
+      route-map OARNET_AS13501_OUT permit 10
         match ip prefix-list PL_DEFAULT_OUT
       !
-      route-map OARNET_AS3359_IN permit 10
+      route-map OARNET_AS13501_IN permit 10
         match ip prefix-list PL_DEFAULT_IN
         set local-preference 150
       !
-      route-map ATT_AS1017_IN permit 10
+      route-map ATT_AS7018_IN permit 10
         match ip prefix-list PL_DEFAULT_IN
         set local-preference 150
       !
-      route-map COX_AS9898_IN permit 10
+      route-map LEVEL3_AS3356_IN permit 10
         match ip prefix-list PL_DEFAULT_IN
 
 router bgp 65001
    maximum-paths 4 ecmp 4
    !
    vrf default
-      neighbor 192.168.0.1 remote-as 3359
+      neighbor 192.168.0.1 remote-as 13501
       neighbor 192.168.0.1 description OARNET BGP peer
       neighbor 192.168.0.1 maximum-routes 12000
-      neighbor 192.168.0.1 route-map OARNET_AS3359_OUT out
-      neighbor 192.168.0.1 route-map OARNET_AS3359_IN in
+      neighbor 192.168.0.1 route-map OARNET_AS13501_OUT out
+      neighbor 192.168.0.1 route-map OARNET_AS13501_IN in
       neighbor 192.168.0.1 password my_hash
       !
-      neighbor 192.168.10.2 remote-as 1017
+      neighbor 192.168.10.2 remote-as 7018
       neighbor 192.168.10.2 description ATT BGP peer
       neighbor 192.168.10.2 maximum-routes 12000
-      neighbor 192.168.10.2 route-map ATT_AS1017_OUT out
-      neighbor 192.168.10.2 route-map ATT_AS1017_IN in
+      neighbor 192.168.10.2 route-map ATT_AS7018_OUT out
+      neighbor 192.168.10.2 route-map ATT_AS7018_IN in
       neighbor 192.168.10.2 password good_pass
       !
-      neighbor 192.168.11.2 remote-as 9898
-      neighbor 192.168.11.2 description COX BGP peer
+      neighbor 192.168.11.2 remote-as 3356
+      neighbor 192.168.11.2 description LEVEL3 BGP peer
       neighbor 192.168.11.2 maximum-routes 12000
-      neighbor 192.168.11.2 route-map COX_AS9898_OUT out
-      neighbor 192.168.11.2 route-map COX_AS9898_IN in
+      neighbor 192.168.11.2 route-map LEVEL3_AS3356_OUT out
+      neighbor 192.168.11.2 route-map LEVEL3_AS3356_IN in
       !
-      network 10.96.0.0/24
+      network 10.97.10.0/24
       network 10.97.11.0/24
-      network 10.99.15.0/24
-      network 10.100.5.0/25
-      network 10.100.6.128/25
+      network 10.97.12.0/24
+      network 10.97.13.0/24
+      network 10.97.14.0/24
 !
 router general
    router-id ipv4 192.168.199.1
@@ -135,15 +116,15 @@ config router bgp
     set router-id 192.168.199.1
     config neighbor
         edit "192.168.0.1"
-            set remote-as 3359
+            set remote-as 13501
         next
     end
         edit "192.168.10.2"
-            set remote-as 1017
+            set remote-as 7018
         next
     end
         edit "192.168.11.2"
-            set remote-as 9898
+            set remote-as 3356
         next
     end
 
@@ -153,29 +134,41 @@ config router bgp
 ############################################
 #           Cisco BGP snippet              #
 ############################################
+      ip prefix-list PL_DEFAULT_IN seq 10 permit 10.96.10.0/24
+    ip prefix-list PL_DEFAULT_IN seq 20 permit 10.96.11.0/24
+    ip prefix-list PL_DEFAULT_IN seq 30 permit 10.96.12.0/24
+    ip prefix-list PL_DEFAULT_IN seq 40 permit 10.96.13.0/24
+    ip prefix-list PL_DEFAULT_IN seq 50 permit 10.96.14.0/24
+
+      ip prefix-list PL_DEFAULT_OUT seq 10 permit 10.97.10.0/24
+    ip prefix-list PL_DEFAULT_OUT seq 20 permit 10.97.11.0/24
+    ip prefix-list PL_DEFAULT_OUT seq 30 permit 10.97.12.0/24
+    ip prefix-list PL_DEFAULT_OUT seq 40 permit 10.97.13.0/24
+    ip prefix-list PL_DEFAULT_OUT seq 50 permit 10.97.14.0/24
+
 
 router bgp 65001
      router_id 192.168.199.1
-      neighbor 192.168.0.1 remote-as 3359
+      neighbor 192.168.0.1 remote-as 13501
       neighbor 192.168.0.1 description OARNET BGP peer
-      neighbor 192.168.0.1 route-map OARNET_AS3359_OUT out
-      neighbor 192.168.0.1 route-map OARNET_AS3359_IN in
+      neighbor 192.168.0.1 route-map OARNET_AS13501_OUT out
+      neighbor 192.168.0.1 route-map OARNET_AS13501_IN in
       !
-      neighbor 192.168.10.2 remote-as 1017
+      neighbor 192.168.10.2 remote-as 7018
       neighbor 192.168.10.2 description ATT BGP peer
-      neighbor 192.168.10.2 route-map ATT_AS1017_OUT out
-      neighbor 192.168.10.2 route-map ATT_AS1017_IN in
+      neighbor 192.168.10.2 route-map ATT_AS7018_OUT out
+      neighbor 192.168.10.2 route-map ATT_AS7018_IN in
       !
-      neighbor 192.168.11.2 remote-as 9898
-      neighbor 192.168.11.2 description COX BGP peer
-      neighbor 192.168.11.2 route-map COX_AS9898_OUT out
-      neighbor 192.168.11.2 route-map COX_AS9898_IN in
+      neighbor 192.168.11.2 remote-as 3356
+      neighbor 192.168.11.2 description LEVEL3 BGP peer
+      neighbor 192.168.11.2 route-map LEVEL3_AS3356_OUT out
+      neighbor 192.168.11.2 route-map LEVEL3_AS3356_IN in
       !
-      network 10.96.0.0 mask 255.255.255.0
+      network 10.97.10.0 mask 255.255.255.0
       network 10.97.11.0 mask 255.255.255.0
-      network 10.99.15.0 mask 255.255.255.0
-      network 10.100.5.0 mask 255.255.255.128
-      network 10.100.6.128 mask 255.255.255.128
+      network 10.97.12.0 mask 255.255.255.0
+      network 10.97.13.0 mask 255.255.255.0
+      network 10.97.14.0 mask 255.255.255.0
 
 ############################################
 #             Palo BGP snippet             #
@@ -191,24 +184,24 @@ set network virtual-router default protocol bgp peer-group bgp_peer_group peer O
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer OARNET local-address interface ethernet1/4.898
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer OARNET max-prefixes 5000
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer OARNET enable yes
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer OARNET peer-as 3359
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer OARNET peer-as 13501
 set network virtual-router default protocol bgp peer-group bgp_peer_group enable yes
 !
-set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.96.0.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.97.10.0/24 exact yes
 set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.100.6.128/25 exact yes
+set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules OARNET match address-prefix 10.97.14.0/24 exact yes
 set network virtual-router default protocol bgp policy export rules OARNET match route-table unicast
 set network virtual-router default protocol bgp policy export rules OARNET used-by bgp_peer_group
 set network virtual-router default protocol bgp policy export rules OARNET enable no
 !
 set network virtual-router default protocol bgp policy import rules OARNET action allow update local-preference 150
-set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.96.0.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.97.10.0/24 exact yes
 set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.100.6.128/25 exact yes
+set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules OARNET match address-prefix 10.97.14.0/24 exact yes
 set network virtual-router default protocol bgp policy import rules OARNET match route-table unicast
 set network virtual-router default protocol bgp policy import rules OARNET used-by bgp_peer_group
 set network virtual-router default protocol bgp policy import rules OARNET enable yes
@@ -218,52 +211,52 @@ set network virtual-router default protocol bgp peer-group bgp_peer_group peer A
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer ATT local-address interface ethernet1/4.898
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer ATT max-prefixes 5000
 set network virtual-router default protocol bgp peer-group bgp_peer_group peer ATT enable yes
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer ATT peer-as 1017
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer ATT peer-as 7018
 set network virtual-router default protocol bgp peer-group bgp_peer_group enable yes
 !
 set network virtual-router default protocol bgp policy export rules prepend action allow update as-path prepend 3
-set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.96.0.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.97.10.0/24 exact yes
 set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.100.6.128/25 exact yes
+set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules ATT match address-prefix 10.97.14.0/24 exact yes
 set network virtual-router default protocol bgp policy export rules ATT match route-table unicast
 set network virtual-router default protocol bgp policy export rules ATT used-by bgp_peer_group
 set network virtual-router default protocol bgp policy export rules ATT enable no
 !
 set network virtual-router default protocol bgp policy import rules ATT action allow update local-preference 150
-set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.96.0.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.97.10.0/24 exact yes
 set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.100.6.128/25 exact yes
+set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules ATT match address-prefix 10.97.14.0/24 exact yes
 set network virtual-router default protocol bgp policy import rules ATT match route-table unicast
 set network virtual-router default protocol bgp policy import rules ATT used-by bgp_peer_group
 set network virtual-router default protocol bgp policy import rules ATT enable yes
 !
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX peer-address ip 192.168.11.2
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX local-address 192.168.11.1/30
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX local-address interface ethernet1/4.898
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX max-prefixes 5000
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX enable yes
-set network virtual-router default protocol bgp peer-group bgp_peer_group peer COX peer-as 9898
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 peer-address ip 192.168.11.2
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 local-address 192.168.11.1/30
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 local-address interface ethernet1/4.898
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 max-prefixes 5000
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 enable yes
+set network virtual-router default protocol bgp peer-group bgp_peer_group peer LEVEL3 peer-as 3356
 set network virtual-router default protocol bgp peer-group bgp_peer_group enable yes
 !
 set network virtual-router default protocol bgp policy export rules prepend action allow update as-path prepend 4
-set network virtual-router default protocol bgp policy export rules COX match address-prefix 10.96.0.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules COX match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules COX match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy export rules COX match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy export rules COX match address-prefix 10.100.6.128/25 exact yes
-set network virtual-router default protocol bgp policy export rules COX match route-table unicast
-set network virtual-router default protocol bgp policy export rules COX used-by bgp_peer_group
-set network virtual-router default protocol bgp policy export rules COX enable no
+set network virtual-router default protocol bgp policy export rules LEVEL3 match address-prefix 10.97.10.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules LEVEL3 match address-prefix 10.97.11.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules LEVEL3 match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules LEVEL3 match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules LEVEL3 match address-prefix 10.97.14.0/24 exact yes
+set network virtual-router default protocol bgp policy export rules LEVEL3 match route-table unicast
+set network virtual-router default protocol bgp policy export rules LEVEL3 used-by bgp_peer_group
+set network virtual-router default protocol bgp policy export rules LEVEL3 enable no
 !
-set network virtual-router default protocol bgp policy import rules COX match address-prefix 10.96.0.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules COX match address-prefix 10.97.11.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules COX match address-prefix 10.99.15.0/24 exact yes
-set network virtual-router default protocol bgp policy import rules COX match address-prefix 10.100.5.0/25 exact yes
-set network virtual-router default protocol bgp policy import rules COX match address-prefix 10.100.6.128/25 exact yes
-set network virtual-router default protocol bgp policy import rules COX match route-table unicast
-set network virtual-router default protocol bgp policy import rules COX used-by bgp_peer_group
-set network virtual-router default protocol bgp policy import rules COX enable yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match address-prefix 10.97.10.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match address-prefix 10.97.11.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match address-prefix 10.97.12.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match address-prefix 10.97.13.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match address-prefix 10.97.14.0/24 exact yes
+set network virtual-router default protocol bgp policy import rules LEVEL3 match route-table unicast
+set network virtual-router default protocol bgp policy import rules LEVEL3 used-by bgp_peer_group
+set network virtual-router default protocol bgp policy import rules LEVEL3 enable yes
