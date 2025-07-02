@@ -118,6 +118,7 @@ config router bgp
 ############################################
 #           Cisco BGP snippet              #
 ############################################
+
 {% for pl_name, pl_lines in prefix_lists.items() %}
 {% for line in pl_lines %}
 ip prefix-list {{ pl_name }} seq {{ loop.index * 10 }} permit {{ line }}

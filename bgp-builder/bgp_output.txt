@@ -134,6 +134,7 @@ config router bgp
 ############################################
 #           Cisco BGP snippet              #
 ############################################
+
 ip prefix-list PL_DEFAULT_IN seq 10 permit 10.96.10.0/24
 ip prefix-list PL_DEFAULT_IN seq 20 permit 10.96.11.0/24
 ip prefix-list PL_DEFAULT_IN seq 30 permit 10.96.12.0/24
